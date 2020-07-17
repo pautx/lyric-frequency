@@ -1,15 +1,17 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import requests
 from bs4 import BeautifulSoup
 from collections import Counter
-from sys import argv
+from sys import argv, exit
 from time import sleep
 
 # Check for necessary amount of arguments
 if len(argv) > 1:
     print("Scraping lyrics...")
 
+    badChars = ['<br>', '<br/>', ',', '(', ')', '.', '!', '?']
+    sleepTime = 20
     artist = argv[1].lower().replace(' ', '') # Get artist name 
     words = ""
     
@@ -29,7 +31,8 @@ if len(argv) > 1:
     
     if (len(argv) > 5):
         print("More than 5 songs, slowing requests to avoid detection...")
-        print("ETA: " + str(len(argv) * 30 / 60) + " minutes for " + str(len(argv)) + " songs.")
+        print("ETA: " + str(int(len(argv) * sleepTime / 60)) + " minutes for " + str(len(argv)) + " songs.")
+        print("=" * 80)
 
     # Scrape all artist's songs using azlyrics
     while i < len(argv):
@@ -38,10 +41,15 @@ if len(argv) > 1:
         URL = "https://www.azlyrics.com/lyrics/" + artist + "/" + song + ".html"
         html = requests.get(URL).content
 
-        if (len(argv) < 6):
-            sleep(1)
-        else:
-            sleep(30)
+        try:
+            if (len(argv) < 6):
+                sleep(1)
+            else:
+                sleep(sleepTime)
+        except:
+            print()
+            print("Program exit")
+            exit()
 
         parseHTML = BeautifulSoup(html, 'html.parser')
         title = parseHTML.title.string
@@ -50,9 +58,15 @@ if len(argv) > 1:
             print("Song not found")
         else:
             print(title.replace(' Lyrics | AZLyrics.com', ''))
-            divs = parseHTML.find_all('div')
 
-            lyrics = str(divs[20]).replace('<br/>', '').replace(',', '').replace('(', '').replace(')', '').split('\n')
+            divs = parseHTML.find_all('div')
+            lyrics = str(divs[20])
+
+            for badChar in badChars:
+                if badChar in lyrics:
+                    lyrics = lyrics.replace(badChar, '')
+
+            lyrics = lyrics.split('\n')
             lines = lyrics[2:len(lyrics) - 1]
 
             for line in lines:
@@ -70,7 +84,4 @@ if len(argv) > 1:
 
 else:
     print("Usage: ./run [ARTIST] [SONGS]...")
-
-
-
 
