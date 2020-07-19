@@ -10,8 +10,9 @@ from time import sleep
 if len(argv) > 1:
     print("Scraping lyrics...")
 
-    badChars = ['<br>', '<br/>', ',', '(', ')', '.', '!', '?']
-    sleepTime = 20
+    badChars = ['<br/>', ',', '(', ')', '.', '!', '?', '"']
+    lyricDiv = 20
+    sleepTime = 15
     artist = argv[1].lower().replace(' ', '') # Get artist name 
     words = ""
     
@@ -24,6 +25,7 @@ if len(argv) > 1:
 
         parseHTML = BeautifulSoup(html, 'html.parser')
 
+        # Gathers all links for artist's lyrics
         for link in parseHTML.find_all('a'):
             if "lyrics/" + artist in str(link.get('href')):
                 song = link.get('href')[11 + len(artist):]
@@ -48,8 +50,7 @@ if len(argv) > 1:
                 sleep(sleepTime)
         except:
             print()
-            print("Program exit")
-            exit()
+            exit("Program Exit")
 
         parseHTML = BeautifulSoup(html, 'html.parser')
         title = parseHTML.title.string
@@ -57,11 +58,13 @@ if len(argv) > 1:
         if (title[0:8] == "AZLyrics"):
             print("Song not found")
         else:
-            print(title.replace(' Lyrics | AZLyrics.com', ''))
+            print(title.replace(' Lyrics | AZLyrics.com', '')) # Cleans out song title
 
             divs = parseHTML.find_all('div')
-            lyrics = str(divs[20])
+            
+            lyrics = str(divs[lyricDiv])
 
+            # Cleans out html tags and spaces from the words in lyrics
             for badChar in badChars:
                 if badChar in lyrics:
                     lyrics = lyrics.replace(badChar, '')
@@ -70,11 +73,12 @@ if len(argv) > 1:
             lines = lyrics[2:len(lyrics) - 1]
 
             for line in lines:
-                words += line + " "
+                if "<i>" not in line: # Removes singer identifiers
+                    words += line + " "
 
         i += 1
 
-    # Gather and count all words
+    # Split up and count all words
     words = words.lower().split(' ')
     wordFreq = Counter(words)
 
@@ -84,4 +88,5 @@ if len(argv) > 1:
 
 else:
     print("Usage: ./run [ARTIST] [SONGS]...")
+
 
