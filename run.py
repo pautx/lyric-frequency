@@ -63,7 +63,7 @@ if len(argv) > 1:
             divs = parseHTML.find_all('div')
             
             lyrics = str(divs[lyricDiv])
-            print(lyrics)
+
             # Cleans out html tags and spaces from the words in lyrics
             for badChar in badChars:
                 if badChar in lyrics:
