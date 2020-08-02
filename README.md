@@ -2,7 +2,7 @@
 Scrapes through AZLyrics to find an artist's lyrics and counts them
 
 Usage: `./run.py [ARTIST] [SONGS]...`
-Example: `./run.py`
+Example: `./run.py lilpump guccigang`
 
 Installed Modules
 * requests
